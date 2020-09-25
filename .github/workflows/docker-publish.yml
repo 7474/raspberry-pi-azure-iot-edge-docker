@@ -10,6 +10,7 @@ on:
       - v*
     paths:
       - dotnet-with-opencvsharp/Dockerfile
+      - .github/workflows/docker-publish.yml
 
   # Run tests for any PRs.
   pull_request:
