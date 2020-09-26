@@ -48,35 +48,24 @@ RUN curl -SL -k --output dotnet.tar.gz https://dotnetcli.azureedge.net/dotnet/Ru
     && rm dotnet.tar.gz \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
-# Install OpenCV v4
-# package is v3
 # https://packages.debian.org/source/stable/opencv
 # opencv (3.2.0+dfsg-6)
-# Ref. https://qiita.com/wk_/items/8db529a6b24a955888db
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        # https://stackoverflow.com/questions/14426491/python-3-importerror-no-module-named-setuptools
-        python3-pip python3-setuptools \
-        # https://www.piwheels.org/project/opencv-python/
-        libaom0 libatk-bridge2.0-0 libatk1.0-0 libatlas3-base libatspi2.0-0 libavcodec58 libavformat58 libavutil56 libbluray2 libcairo-gobject2 libcairo2 libchromaprint1 libcodec2-0.8.1 libcroco3 libdatrie1 libdrm2 libepoxy0 libfontconfig1 libgdk-pixbuf2.0-0 libgfortran5 libgme0 libgraphite2-3 libgsm1 libgtk-3-0 libharfbuzz0b libilmbase23 libjbig0 libmp3lame0 libmpg123-0 libogg0 libopenexr23 libopenjp2-7 libopenmpt0 libopus0 libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libpixman-1-0 librsvg2-2 libshine3 libsnappy1v5 libsoxr0 libspeex1 libssh-gcrypt-4 libswresample3 libswscale5 libthai0 libtheora0 libtiff5 libtwolame0 libva-drm2 libva-x11-2 libva2 libvdpau1 libvorbis0a libvorbisenc2 libvorbisfile3 libvpx5 libwavpack1 libwayland-client0 libwayland-cursor0 libwayland-egl1 libwebp6 libwebpmux3 libx264-155 libx265-165 libxcb-render0 libxcb-shm0 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxi6 libxinerama1 libxkbcommon0 libxrandr2 libxrender1 libxvidcore4 libzvbi0 \
+        cmake \
+        libopencv-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# https://pypi.org/project/opencv-python/
-ENV OPENCV_VERSION 4.4.0.44
-RUN pip3 install -U pip \
-    && pip3 install scikit-build \
-    && pip3 install opencv-python==${OPENCV_VERSION}
-
-# # Build OpenCvSharpExtern
-# ENV OPENCVSHARP_VERSION 4.4.0.20200916
-# RUN cd && git clone https://github.com/shimat/opencvsharp.git \
-#     && cd opencvsharp \
-#     && git fetch --all --tags --prune && git checkout ${OPENCVSHARP_VERSION} \
-#     && cd src \
-#     && mkdir build && cd build \
-#     && cmake -D CMAKE_INSTALL_PREFIX=/usr/local/include/ .. \
-#     && make -j \
-#     && make install \
-#     && cp OpenCvSharpExtern/libOpenCvSharpExtern.so /usr/local/lib
-# # cd && rm -rf opencvsharp
-# # apt remove git && apt remove cmake
+# Build OpenCvSharpExtern
+# バージョン不一致だが3.2系はcontribeモジュールが不足していてビルド出来ない
+ENV OPENCVSHARP_VERSION 3.1.0.20161105
+RUN cd && git clone https://github.com/shimat/opencvsharp.git \
+    && cd opencvsharp \
+    && git fetch --all --tags --prune && git checkout ${OPENCVSHARP_VERSION} \
+    && cd src \
+    && mkdir build && cd build \
+    && cmake -D CMAKE_INSTALL_PREFIX=/usr/include/ .. \
+    && make -j \
+    && make install \
+    && cp OpenCvSharpExtern/libOpenCvSharpExtern.so /usr/local/lib \
+    && cd && rm -rf opencvsharp
