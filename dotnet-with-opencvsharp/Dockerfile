@@ -1,12 +1,3 @@
-FROM microsoft/dotnet:2.1-sdk AS build-env
-WORKDIR /app
-
-COPY *.csproj ./
-RUN dotnet restore
-
-COPY . ./
-RUN dotnet publish -c Release -o out RealDiceCameraCvModule.csproj
-
 FROM arm32v7/debian:buster-slim
 # Install .NET Core 2.1 For Azure IoT Edge
 # https://github.com/dotnet/dotnet-docker/blob/master/src/runtime-deps/2.1/stretch-slim/arm32v7/Dockerfile
