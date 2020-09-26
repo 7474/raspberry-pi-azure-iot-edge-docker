@@ -53,6 +53,7 @@ RUN curl -SL -k --output dotnet.tar.gz https://dotnetcli.azureedge.net/dotnet/Ru
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         cmake \
+        git \
         libopencv-dev \
     && rm -rf /var/lib/apt/lists/*
 
