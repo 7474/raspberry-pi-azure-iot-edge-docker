@@ -52,6 +52,7 @@ RUN curl -SL -k --output dotnet.tar.gz https://dotnetcli.azureedge.net/dotnet/Ru
 # opencv (3.2.0+dfsg-6)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        build-essential \
         cmake \
         git \
         libopencv-dev \
