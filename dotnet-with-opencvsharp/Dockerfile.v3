@@ -48,68 +48,26 @@ RUN curl -SL -k --output dotnet.tar.gz https://dotnetcli.azureedge.net/dotnet/Ru
     && rm dotnet.tar.gz \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
-# Install OpenCV v4
-# package is v3
 # https://packages.debian.org/source/stable/opencv
 # opencv (3.2.0+dfsg-6)
-# Ref.
-# - https://qiita.com/wk_/items/8db529a6b24a955888db
-# - https://github.com/Azure-Samples/Custom-vision-service-iot-edge-raspberry-pi/blob/master/modules/CameraCapture/arm32v7.Dockerfile
-# - https://www.pyimagesearch.com/2018/09/26/install-opencv-4-on-your-raspberry-pi/
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         cmake \
         git \
-        libxvidcore-dev libx264-dev \
-        # Hierarchical Data Format
-        libhdf5-dev libhdf5-serial-dev \
-        # for image files
-        libjpeg-dev libtiff5-dev libpng-dev \
-        # for video files
-        libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
-        # for gui
-        libqt4-test libqtgui4 libqtwebkit4 libgtk2.0-dev \
-        # high def image processing
-        libilmbase-dev libopenexr-dev \
+        libopencv-dev \
     && rm -rf /var/lib/apt/lists/*
 
-ENV OPENCV_VERSION 4.4.0
-RUN cd && mkdir opencv4 && cd opencv4 \
-    && git clone https://github.com/opencv/opencv.git \
-    && git clone https://github.com/opencv/opencv_contrib.git \
-    && cd opencv_contrib \
-    && git fetch --all --tags --prune && git checkout ${OPENCV_VERSION} \
-    && cd ../opencv \
-    && git fetch --all --tags --prune && git checkout ${OPENCV_VERSION} \
-    && mkdir build \
-    && cd build \
-    && cmake \
-    -D CMAKE_BUILD_TYPE=Release \
-    -D BUILD_DOCS=OFF \
-    -D BUILD_EXAMPLES=OFF \
-    -D BUILD_TESTS=OFF \
-    -D BUILD_PERF_TESTS=OFF \
-    -D WITH_CUDA=OFF \
-    -D CMAKE_INSTALL_PREFIX=/usr/local \
-    -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
-    -S ../ \
-    && make \
-    && make install \
-    && cd && rm -rf ./opencv4
-
 # Build OpenCvSharpExtern
-ENV OPENCVSHARP_VERSION 4.4.0.20200916
+# バージョン不一致だが3.2系はcontribeモジュールが不足していてビルド出来ない
+ENV OPENCVSHARP_VERSION 3.1.0.20161105
 RUN cd && git clone https://github.com/shimat/opencvsharp.git \
     && cd opencvsharp \
     && git fetch --all --tags --prune && git checkout ${OPENCVSHARP_VERSION} \
     && cd src \
     && mkdir build && cd build \
-    && cmake -D CMAKE_INSTALL_PREFIX=/usr/local/ .. \
-    && make \
+    && cmake -D CMAKE_INSTALL_PREFIX=/usr/include/ .. \
+    && make -j \
     && make install \
-    && ldconfig \
+    && cp OpenCvSharpExtern/libOpenCvSharpExtern.so /usr/local/lib \
     && cd && rm -rf opencvsharp
-
-# libOpenCvSharpExtern.so install directory
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/lib/
